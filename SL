@@ -1,0 +1,303 @@
+getgenv().whitelisted = true
+--[[                        warn("Wait 7 Seconds Script Is Loading!")
+                            wait(0.1)
+                            repeat
+                                wait(0.1)
+                            until game:IsLoaded()
+
+                            wait(7)
+                            
+                            local Crash = function()
+                                while true do end
+                            end
+                            local Kick = clonefunction(game.Players.LocalPlayer.Kick);
+                            --
+                            local HookedCheck = function(func)
+                                if islclosure(func) then
+                                    return true;
+                                end
+                                local info = debug.getinfo(func)
+                                if info.source ~= "=[C]" or info.short_src ~= "[C]" or info.what ~= "C" then
+                                    return true;
+                                end
+                                return false;
+                            end
+                            --
+                            local success, error = pcall(function()
+                                loadstring("\t\t")()
+                                loadstring("getgenv().whitelisted = true")();
+                            end)
+                            if not success then
+                                Kick(Codes["Check"]["TamperingDetected"]); Crash();
+                            end
+                            if not getgenv().whitelisted then Kick(Codes["Check"]["TamperingDetected"]) end
+                            if game:GetService("RunService"):IsStudio() then Kick(Codes["Check"]["TamperingDetected"]); Crash(); end
+                            --
+                            if pcall(islclosure) then
+                                if debugeverything then
+                                    print("islclosure"); return;
+                                end
+                                Crash();
+                            end;
+                            if not request or HookedCheck(islclosure) or HookedCheck(debug.getinfo) or HookedCheck(request) then
+                                if debugeverything then
+                                    print("http spy"); return;
+                                end
+                                    Crash();
+                                end
+                            --
+                            local CheckAllThese = {math.random, os.clock, string.char, string.byte, pcall, setfenv, iscclosure, loadstring, math.floor, string.sub}
+                            for i = 1, #CheckAllThese do
+                                if (pcall(setfenv, CheckAllThese[i], {})) or (HookedCheck(CheckAllThese[i])) then
+                                    if debugeverything then
+                                        print("checkallthese"); return;
+                                    end
+                                    Crash();
+                                end
+                            end
+                        --- dont mess with above ---
+]]
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ScrewMaker/LibraryDrawFix/refs/heads/main/LDF"))()
+
+local function getCustomAsset(path)
+    if not isfile(path) then
+        writefile(path, crypt.base64.decode(path))
+    end
+    return getcustomasset(path)
+end
+
+local os_clock = os.clock();
+local FPS = string.split(game.Stats.Workspace.Heartbeat:GetValueString(), ".");
+local camera = game:GetService("Workspace").Camera;
+local Camera = game:GetService("Workspace").CurrentCamera
+local CharcaterMiddle = game:GetService("Workspace").Ignore.LocalCharacter.Middle
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService")
+local Decimals = 2
+local Clock = os.clock()
+local OsClock = os.clock()
+
+if not LPH_OBFUSCATED then
+    LPH_JIT = function(...) return ... end
+    LPH_JIT_MAX = function(...) return ... end
+    LPH_JIT_ULTRA = function(...) return ... end
+    LPH_NO_VIRTUALIZE = function(...) return ... end
+    LPH_ENCSTR = function(...) return ... end
+    LPH_STRENC = function(...) return ... end
+    LPH_HOOK_FIX = function(...) return ... end
+    LPH_CRASH = function() return print(debug.traceback()) end
+end;
+
+local trident = { -- swimhub moment start
+    loaded = false,
+    gc = {
+        isgrounded = nil,
+        character = nil,
+        camera = nil
+    },
+}
+
+LPH_JIT_MAX(function()
+    for i, v in pairs(getgc(true)) do
+        if type(v) == "table" then
+            if type(rawget(v, "updateCharacter")) == "function" then
+                trident.gc.character = v
+            end
+
+            if type(rawget(v, "SetMaxRelativeLookExtentsY")) == "function" then
+                trident.gc.camera = v
+            end
+        end
+    end
+end)()
+
+local noatvrestriction = true
+
+task.spawn(function()
+    local thing = trident.gc.camera.SetMaxRelativeLookExtentsY
+    while wait() do
+        if noatvrestriction then
+            thing(10000)
+        end
+    end
+end)
+
+local modules = {
+    ["PlayerClient"] = {},
+    ["Character"] = {},
+    ["Camera"] = {},
+    ["RangedWeaponClient"] = {},
+    ["GetEquippedItem"] = {},
+    ["FPS"] = {},
+}
+
+for _, v in pairs(getgc(true)) do
+    if typeof(v) == "function" and islclosure(v) then
+        local info = debug.getinfo(v)
+        local name = string.match(info.short_src, "%.([%w_]+)$")
+        if name and modules[name] and info.name then
+            modules[name][info.name] = info.func
+        end
+    end
+end
+
+local lamae = debug.getupvalues(modules.Character.updateCharacter)
+local RunService, Camera = game:GetService("RunService"), workspace.CurrentCamera
+local players = game:GetService("Players")
+local localPlayer = players.LocalPlayer
+local Color3_fromRGB, Drawing_new, pairs, Vector2_new = Color3.fromRGB, Drawing.new, pairs, Vector2.new
+
+local settings = {
+    killAura = {
+        enabled = true,
+        distance = 10,
+        validWeapons = {
+            ["Hammer"] = true,
+            ["Crowbar"] = true,
+            ["StoneHammer"] = true,
+            ["SteelHammer"] = true,
+            ["MiningDrill"] = true,
+            ["IronHammer"] = true
+        },
+        hitPart = "Head"
+    },
+    corpseESP = {
+        enabled = false,
+        textColor = Color3_fromRGB(255, 0, 0),
+        outlineColor = Color3_fromRGB(0, 0, 0),
+        unionColor = Color3_fromRGB(205, 205, 205)
+    },
+    atvESP = {
+        enabled = true,
+        textColor = Color3_fromRGB(0, 255, 0),
+        outlineColor = Color3_fromRGB(0, 0, 0)
+    }
+}
+
+local function GetLocalToolName()
+    if not CharacterList or not CharacterList[2] or not CharacterList[2].GetEquippedItem then
+        return "nothing you pooron"
+    end
+    local equippedItem = CharacterList[2].GetEquippedItem()
+    return equippedItem and equippedItem.type or "nothing you pooron"
+end
+
+local function GetClosestPlayer()
+    local closest, playerTable, closestMagnitude = nil, nil, math.huge
+    local localCharPos = workspace.Ignore.LocalCharacter.Middle.Position
+
+    for _, v in pairs(PlayerList or {}) do
+        if v.type == "Player" and v.model then
+            local humanoidRootPart = v.model:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart and not v.sleeping then
+                local partPos, onScreen = Camera:WorldToViewportPoint(humanoidRootPart.Position)
+                local playerDistance = (localCharPos - humanoidRootPart.Position).Magnitude
+                if playerDistance <= settings.killAura.distance and onScreen then
+                    local magnitude = (Vector2.new(partPos.X, partPos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
+                    if magnitude < closestMagnitude then
+                        closestMagnitude = magnitude
+                        closest = v.model
+                        playerTable = v
+                    end
+                end
+            end
+        end
+    end
+    return closest, playerTable
+end
+
+task.spawn(function()
+    while task.wait(0.01) do
+        if settings.killAura.enabled then
+            local player, fr = GetClosestPlayer()
+            local Weapon = GetLocalToolName()
+            if player and fr and settings.killAura.validWeapons[Weapon] then
+                localPlayer.TCP:FireServer(10, "Swing")
+                localPlayer.TCP:FireServer(10, "Hit", fr.id, player.HumanoidRootPart.Position, settings.killAura.hitPart, Vector3.new(0, 0, 0))
+                task.wait(Weapon == "MiningDrill" and 0.01 or 0.95)
+            else
+                task.wait(0.1)
+            end
+        end
+    end
+end)
+
+local CorpseCaches, ATVCache = {}, {}
+
+workspace.ChildAdded:Connect(function(child)
+    if settings.corpseESP.enabled then
+        local unionOp = child:FindFirstChildOfClass("UnionOperation")
+        if unionOp and unionOp.Color == settings.corpseESP.unionColor then
+            local corpseCache = Drawing.new("Text")
+            corpseCache.Size = 10
+            corpseCache.Color = settings.corpseESP.textColor
+            corpseCache.Outline = true
+            corpseCache.OutlineColor = settings.corpseESP.outlineColor
+            CorpseCaches[child] = corpseCache
+        end
+    end
+end)
+
+workspace.ChildRemoved:Connect(function(child)
+    local corpseCache = CorpseCaches[child]
+    if corpseCache then
+        corpseCache:Remove()
+        CorpseCaches[child] = nil
+    end
+end)
+
+workspace.ChildAdded:Connect(function(child)
+    if settings.atvESP.enabled then
+        local seat = child:FindFirstChild("Seat")
+        local plastics = child:FindFirstChild("Plastics")
+        if seat and plastics then
+            local atvHighlight = Drawing.new("Text")
+            atvHighlight.Size = 10
+            atvHighlight.Color = settings.atvESP.textColor
+            atvHighlight.Outline = true
+            atvHighlight.OutlineColor = settings.atvESP.outlineColor
+            ATVCache[child] = atvHighlight
+        end
+    end
+end)
+
+workspace.ChildRemoved:Connect(function(child)
+    local atvHighlight = ATVCache[child]
+    if atvHighlight then
+        atvHighlight:Remove()
+        ATVCache[child] = nil
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if settings.corpseESP.enabled then
+        for corpse, corpseCache in pairs(CorpseCaches) do
+            local primaryPart = corpse.PrimaryPart
+            if primaryPart then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(primaryPart.Position)
+                local distance = (Camera.CFrame.Position - primaryPart.Position).Magnitude
+                corpseCache.Visible = onScreen
+                if corpseCache.Visible then
+                    corpseCache.Text = "Corpse [" .. math.floor(distance) .. "]"
+                    corpseCache.Position = Vector2.new(screenPos.X, screenPos.Y)
+                end
+            end
+        end
+    end
+
+    if settings.atvESP.enabled then
+        for atv, atvHighlight in pairs(ATVCache) do
+            local primaryPart = atv.PrimaryPart
+            if primaryPart then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(primaryPart.Position)
+                local distance = (Camera.CFrame.Position - primaryPart.Position).Magnitude
+                atvHighlight.Visible = onScreen
+                if atvHighlight.Visible then
+                    atvHighlight.Text = "ATV [" .. math.floor(distance) .. "]"
+                    atvHighlight.Position = Vector2.new(screenPos.X, screenPos.Y)
+                end
+            end
+        end
+    end
+end)
