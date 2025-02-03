@@ -123,6 +123,7 @@ task.spawn(function()
     end
 end)
 
+-- Setting up the modules and functions as before
 local modules = {
     ["PlayerClient"] = {},
     ["Character"] = {},
@@ -132,6 +133,7 @@ local modules = {
     ["FPS"] = {},
 }
 
+-- Code for processing functions and settings remains the same
 for _, v in pairs(getgc(true)) do
     if typeof(v) == "function" and islclosure(v) then
         local info = debug.getinfo(v)
@@ -142,6 +144,7 @@ for _, v in pairs(getgc(true)) do
     end
 end
 
+-- Continue with the setup as it was
 local lamae = debug.getupvalues(modules.Character.updateCharacter)
 local RunService, Camera = game:GetService("RunService"), workspace.CurrentCamera
 local players = game:GetService("Players")
@@ -181,6 +184,7 @@ local settings = {
     }
 }
 
+-- Define functions as before
 local function GetLocalToolName()
     if not CharacterList or not CharacterList[2] or not CharacterList[2].GetEquippedItem then
         return "nothing you pooron"
@@ -213,6 +217,7 @@ local function GetClosestPlayer()
     return closest, playerTable
 end
 
+-- Main task for Kill Aura
 task.spawn(function()
     while task.wait(0.01) do
         if settings.killAura.enabled then
@@ -229,6 +234,7 @@ task.spawn(function()
     end
 end)
 
+-- Main task for Silent Farm
 task.spawn(function()
     while task.wait(0.01) do
         if settings.silentFarm.enabled then
@@ -265,6 +271,7 @@ task.spawn(function()
     end
 end)
 
+-- ESP and Corpse rendering remains the same, without tabs
 local CorpseCaches, ATVCache = {}, {}
 
 workspace.ChildAdded:Connect(function(child)
