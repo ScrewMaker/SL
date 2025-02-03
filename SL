@@ -164,7 +164,7 @@ local settings = {
     },
     silentFarm = {
         enabled = true,
-        speed = 0.01,
+        speed = 2,
         distance = 10,
         entities = {"Cactus", "Tree", "Nitrate", "Stone", "Iron"}
     },
